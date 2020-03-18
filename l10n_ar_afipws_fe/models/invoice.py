@@ -455,22 +455,23 @@ print "Observaciones:", wscdc.Obs
                 #fecha_cbte = fecha_cbte.replace("-", "")
                 fecha_cbte = inv.date_invoice.strftime('%Y%m%d')
 
-            # due and billing dates only for concept "services"
-            if int(concepto) != 1:
+            mipyme_fce = int(doc_afip_code) in [
+                201, 202, 203, 206, 207, 208, 211, 212, 213]
+
+            # due date only for concept "services" and mipyme_fce
+            if int(concepto) != 1 or mipyme_fce:
                 fecha_venc_pago = inv.date_due or inv.date_invoice
                 if afip_ws != 'wsmtxca':
                     fecha_venc_pago = fecha_venc_pago.strftime('%Y%m%d')
             else:
-                #fecha_venc_pago = None
-                fecha_venc_pago = inv.date_due or inv.date_invoice
+                fecha_venc_pago = None
 
             # fecha de servicio solo si no es 1
             if int(concepto) != 1:
                 fecha_serv_desde = inv.afip_service_start
                 fecha_serv_hasta = inv.afip_service_end
                 if afip_ws != 'wsmtxca':
-                    if type(fecha_venc_pago)  != str:
-                    	fecha_venc_pago = fecha_venc_pago.strftime('%Y%m%d')
+                    #fecha_venc_pago = fecha_venc_pago.strftime('%Y%m%d')
                     fecha_serv_desde = fecha_serv_desde.strftime('%Y%m%d')
                     fecha_serv_hasta = fecha_serv_hasta.strftime('%Y%m%d')
             else:
@@ -495,7 +496,6 @@ print "Observaciones:", wscdc.Obs
             imp_op_ex = str("%.2f" % inv.vat_exempt_base_amount)
             moneda_id = inv.currency_id.afip_code
             moneda_ctz = inv.currency_rate
-            mipyme_fce = False
 
             # create the invoice internally in the helper
             if afip_ws == 'wsfe':
@@ -660,6 +660,8 @@ print "Observaciones:", wscdc.Obs
             if afip_ws != 'wsfe':
                 for line in inv.invoice_line_ids:
                     codigo = line.product_id.default_code
+                    if (line.product_id.codigo_ncm):
+                        codigo = line.product_id.codigo_ncm
                     # unidad de referencia del producto si se comercializa
                     # en una unidad distinta a la de consumo
                     if not line.uom_id.afip_code:
@@ -704,7 +706,7 @@ print "Observaciones:", wscdc.Obs
                                 iva_id, importe + imp_iva)
                     elif afip_ws == 'wsfex':
                         ws.AgregarItem(
-                            codigo, ds, qty, umed, precio, importe,
+                            codigo, ds, qty, umed, precio, "%.2f" % importe,
                             bonif)
 
             # Request the authorization! (call the AFIP webservice method)
@@ -718,10 +720,10 @@ print "Observaciones:", wscdc.Obs
                     ws.AutorizarComprobante()
                     vto = ws.Vencimiento
                 elif afip_ws == 'wsfex':
-                    ws.Authorize(inv.id)
+                    ws.Authorize(inv.id*1000000)
                     vto = ws.FchVencCAE
                 elif afip_ws == 'wsbfe':
-                    ws.Authorize(inv.id)
+                    ws.Authorize(inv.id*1000000)
                     vto = ws.Vencimiento
             except SoapFault as fault:
                 msg = 'Falla SOAP %s: %s' % (
