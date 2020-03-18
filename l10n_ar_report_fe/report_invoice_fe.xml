@@ -133,7 +133,7 @@
               <table class="table table-condensed">
                   <thead>
                     <tr>
-                      <th>Codigo</th>
+                      <!-- th>Codigo</th -->
                       <th>Descripción</th>
                       <th class="hidden">Documento Origen</th>
                       <th class="text-right">Cantidad</th>
@@ -149,9 +149,9 @@
                   </thead>
                   <tbody class="invoice_tbody">
                     <tr t-foreach="o.invoice_line_ids" t-as="l">
-                      <!-- td><span t-field="l.name"/></td -->
-                      <td><span t-field="l.product_id.default_code"/></td>
-                      <td><span t-field="l.product_id.name"/></td>
+                      <td><span t-field="l.name"/></td>
+                      <!-- td><span t-field="l.product_id.default_code"/></td -->
+                      <!-- td><span t-field="l.product_id.name"/></td -->
                       <td class="hidden"><span t-field="l.origin"/></td>
                       <td class="text-right">
         <span t-esc="'{0:,.2f}'.format(l.quantity)"/>
