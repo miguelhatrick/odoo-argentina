@@ -15,10 +15,24 @@
   <t t-if="not o or not 'company_id' in o">
       <t t-set="company" t-value="res_company"/>
   </t>
+  
+  <t t-if="o.receiptbook_id">
+    <t t-if="o.receiptbook_id.partner_type=='supplier'">
+      <t t-set="p_code" t-value="'OP'"/>
+      <t t-set="p_name" t-value="'ORDEN DE PAGO'"/>
+      <t t-set="p_type" t-value="'Proveedor'"/>
+    </t>
+    <t t-else="">
+      <t t-set="p_code" t-value="'REC'"/>
+      <t t-set="p_name" t-value="'RECIBO'"/>
+      <t t-set="p_type" t-value="'Cliente'"/>
+    </t>
+    
+  </t>
 
   <div class="article" t-att-data-oe-model="o and o._name" t-att-data-oe-id="o and o.id">
     <!--HEADER-->
-    <div class="header"  style="margin-bottom: 0px !important;">
+    <div class="header" style="margin-bottom: 0px !important;">
 		<div class="row" style="border: 1px solid black; border-radius: 10px; margin-bottom: 0px !important;">
 			<!--COMPANY LOGO-->
 			<div class="col-3 text-left">
@@ -33,20 +47,24 @@
 			<!--DOCUMENT LETTER-->
 			<div class="col-2 text-center">
 			  <div class="card" style="margin:0px;">
-				<div class="card-header" style="font-size: 48px;padding:0px;">REC</div>
+				<div class="card-header" style="font-size: 48px;padding:0px;">
+				  <t t-esc="p_code"/>
+				</div>
 				<div class="card-body" style="height: 20px;padding:0px;"><br/></div>
 			  </div>
 			</div><!--END DOCUMENT LETTER-->
 			<!--TIPO,NRO Y FECHA FACTURA-->
 			<div class="col-5 text-left" name="company_address" style="padding-left: 80px !important;">
-			  <h3>
-					RECIBO
-			  </h3>
+			  <h4>
+			    <t t-esc="p_name"/>
+			  </h4>
+			  <h5>
+			    <span t-if="o.state == 'confirmed' or o.state == 'posted' or o.state == 'draft'">
+						<t t-esc="o.display_name"/>
+			    </span>
+			  </h5>
 			  <span t-if="o.state == 'confirmed' or o.state == 'posted' or o.state == 'draft'">
 					  Fecha: <span t-field="o.payment_date"/><br/>
-			  </span>
-			  <span t-if="o.state == 'confirmed' or o.state == 'posted' or o.state == 'draft'">
-						<!--<span t-field="o.display_name"/>-->
 			  </span>
 			</div>
 			<!--END DATOS FACTURA-->
@@ -73,7 +91,7 @@
   		 <!-- CLIENTE  -->
   		 <div class="row" style="border: 1px solid black; border-radius: 10px;">
   		   <div class="col-2">
-  			 <strong><span>Cliente</span></strong>
+  			 <strong><span><t t-esc="p_type"/></span></strong>
   		   </div>
   		   <div name="invoice_address" class="col-4">
   			 <address t-field="o.partner_id" t-options="{&quot;widget&quot;: &quot;contact&quot;, &quot;fields&quot;: [&quot;address&quot;, &quot;name&quot;], &quot;no_marker&quot;: True}"/>
@@ -117,6 +135,31 @@
 	          </tr>
 	        </tfoot>
 	      </table>
+	      <!--FACTURAS RELACIONADAS-->
+	      <div t-if="o.matched_move_line_ids" class="row" style="border: 0px solid black;">
+	        <div class="col-4">
+	    			 <strong>Facturas relacionadas</strong>
+	       </div>
+	      </div>
+	      <table t-if="o.matched_move_line_ids" class="table">
+	        <thead>
+	            <tr class="border-black">
+	                <th>Nro</th>
+	                <th>Fecha</th>
+	                <th class="text-right">Monto</th>
+	            </tr>
+	        </thead>
+	        <tbody class="invoice_tbody">
+	            <tr t-foreach="o.matched_move_line_ids" t-as="line">
+	              <td><span t-field="line.invoice_id.display_name"/></td>
+	              <td><span t-field="line.invoice_id.date_invoice"/></td>
+	              <td class="text-right">
+	                  <span t-field="line.invoice_id.amount_total" t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: o.currency_id}"/>
+	              </td>
+	            </tr>
+	        </tbody>
+	       </table>
+	      <!--END FACTURAS RELACIONADAS-->
 
 
 	  </div>
