@@ -111,7 +111,7 @@ class VatLedgerXlsx(models.AbstractModel):
                         txids = line.invoice_line_tax_ids;_logger.info(txids)
                         pid_type = line.product_id.type
                         taxid = txids
-                        if ( type(txids)=="list" ):
+                        if ( len(txids)>1 ):
                             taxid = txids[0]
                         if (taxid):
                             if (taxid.description in taxes_product_types):
@@ -140,7 +140,7 @@ class VatLedgerXlsx(models.AbstractModel):
                                 sheet.write(row_index,headers["IVA"].column, inv.partner_id.afip_responsability_type_id.name)
                                 txids = line.invoice_line_tax_ids;
                                 tax_id = txids
-                                if ( type(txids)=="list" ):
+                                if ( len(txids)>1 ):
                                     tax_id = txids[0]
 
                                 sheet.write(row_index,headers["PTIPO"].column, p_type)
@@ -219,7 +219,7 @@ class VatLedgerXlsx(models.AbstractModel):
                         txids = line.invoice_line_tax_ids;_logger.info(txids)
                         pid_type = line.product_id.type
                         taxid = txids
-                        if ( type(txids)=="list" ):
+                        if ( len(txids)>1 ):
                             taxid = txids[0]
                         if (taxid):
                             if (taxid.description in taxes_product_types):
