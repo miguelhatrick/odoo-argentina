@@ -181,7 +181,7 @@
         <report
             id="account_payment_group_report"
             model="account.payment.group"
-            string="Recibo"
+            string="Pagos"
             report_type="qweb-pdf"
             name="l10n_ar_report_payment_group.report_payment_group"
             file="l10n_ar_report_payment_group.report_payment_group"
