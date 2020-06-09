@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <odoo>
     <record model='ir.ui.view' id='account_vat_ledger_tree'>
-        <field name='name'>Account VAT Ledger</field> 
+        <field name='name'>Account VAT Ledger</field>
         <field name="model">account.vat.ledger</field>
         <field name='arch' type='xml'>
             <tree colors="blue:state == 'draft';gray:state == 'cancel'" string="VAT Ledger">
@@ -16,7 +16,7 @@
     </record>
 
     <record model='ir.ui.view' id='account_vat_ledger_form'>
-        <field name='name'>Account VAT Ledger</field> 
+        <field name='name'>Account VAT Ledger</field>
         <field name="model">account.vat.ledger</field>
         <field name='arch' type='xml'>
             <form string="VAT Ledger">
@@ -24,7 +24,7 @@
                 <header>
                     <button name="action_print" string="Print" states="draft" type="object" class="oe_highlight"/>
                     <button name="action_print" string="Print" states="cancel,presented" type="object"/>
-                    <button name="%(report_account_vat_ledger_columns)d" string="Imprimir en columnas (beta)" help="Imprimir libro iva en columnas, beta" type="action"/>
+                    <button name="%(l10n_ar_account_vat_ledger_xlsx.vat_ledger_xlsx)d" string="Imprimir en columnas (beta)" help="Imprimir libro iva en columnas, beta" type="action"/>
                     <button name="action_present" string="Present" states="draft" type="object" class="oe_highlight"/>
                     <button name="action_cancel" string="Cancel" states="draft,presented" type="object"/>
                     <button name="action_to_draft" string="To Draft" states="cancel" type="object"/>

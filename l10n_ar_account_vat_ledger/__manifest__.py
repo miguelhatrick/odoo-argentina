@@ -9,7 +9,7 @@
     'summary': '',
     "depends": [
         # TODO we should try to get this report with another tool, not aeroo
-        "report_aeroo",
+        #"report_aeroo",
         "l10n_ar_account",
         #"report_custom_filename",
         #"date_range",
