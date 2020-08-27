@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="report_account_vat_ledger_qweb">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-set="lang" t-value="o.company_id.partner_id.lang"/>
+                <t t-call="l10n_ar_account_vat_ledger.report_account_vat_ledger_qweb_document" t-lang="lang"/>
+            </t>
+        </t>
+    </template>
+
+    <template id="report_account_vat_ledger_qweb_document">
+        <t t-call="web.html_container">
+        <div class="header" style="border-bottom: 2px solid black">
+            <div class="row">
+                <div class="col-3 text-left">
+                    <p style="margin: 0px"><span t-field="o.company_id.name"/></p>
+                    <p style="margin: 0px">
+                        <span>Punto de registración:</span>
+                        <!-- <span t-field="o.company_id.name"/> -->
+                    </p>
+                    <p style="margin: 0px">
+                        <span>Domicilio:</span>
+                        <span t-field="o.company_id.street"/>
+                    </p>
+                </div>
+                <div class="col-6 text-center" style="padding-top: 10px">
+                    <h2>
+                        <span>Libro IVA </span>
+                        <t t-if="o.type == 'sale'">
+                            <span>Ventas</span>
+                        </t>
+                        <t t-elif="o.type == 'purchase'">
+                            <span>Compras</span>
+                        </t>
+                    </h2>
+                    <div style="margin: 30px 70px 0px 70px; font-size: 14px;">
+                        <div class="pull-left">
+                            <span>Desde el: </span>
+                            <span t-field="o.date_from"/>
+                        </div>
+                        <div class="pull-right">
+                            <span>Hasta el: </span>
+                            <span t-field="o.date_to"/>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-3 text-right">
+                    <p>
+                        <span>Hoja Nro: </span>
+                        <span class="page"/>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="page">
+            <div class="row">
+                <table class="table">
+                    <thead>
+                        <tr valign="top">
+                            <th>Fecha</th>
+                            <th>Comprobante</th>
+                            <th>Razón Social</th>
+                            <th>C.U.I.T.</th>
+                            <th>Nr.Ing.Brutos</th>
+                            <th>Reg. Especiales</th>
+                            <th>Base</th>
+                            <th>Impuesto</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tfoot style="txt">
+                        <tr>
+                            <td colspan="6" style="width: 76%;"> </td>
+                            <td style="width: 8%; text-align: right;">
+                                <strong t-esc="'{0:,.2f}'.format(sum([l.type not in ('out_refund', 'in_refund') and sum([t.base for t in l.tax_line_ids]) for l in o.invoice_ids]) - sum([l.type in ('out_refund', 'in_refund') and sum([t.base for t in l.tax_line_ids]) for l in o.invoice_ids]))"/>
+                            </td>
+                            <td style="width: 8%; text-align: right;">
+                                <strong t-esc="'{0:,.2f}'.format(sum([l.type not in ('out_refund', 'in_refund') and sum([t.amount for t in l.tax_line_ids]) for l in o.invoice_ids]) - sum([l.type in ('out_refund', 'in_refund') and sum([t.amount for t in l.tax_line_ids]) for l in o.invoice_ids]))"/>
+                            </td>
+                            <td style="width: 8%; text-align: right;">
+                                <strong t-esc="'{0:,.2f}'.format(sum([l.type not in ('out_refund', 'in_refund') and l.cc_amount_total for l in o.invoice_ids]) - sum([l.type in ('out_refund', 'in_refund') and l.cc_amount_total for l in o.invoice_ids]))"/>
+                            </td>
+                            <!-- sum(record.tax_line_ids.mapped('base')) -->
+                            <!-- sum([line.amount for line in o.line_ids]) -->
+                        </tr>
+                    </tfoot>
+                    <tbody style="font-size: 15px">
+                        <tr t-foreach="o.invoice_ids" t-as="l" valign="top" style="border-bottom: 1px solid black !important;">
+                            <td style="width: 5%;"><span t-field="l.date_invoice" t-options='{"format": "dd/MM/yy"}'/></td>
+                            <td style="width: 12%;"><span t-field="l.display_name"/></td>
+                            <td style="width: 30%;"><span t-field="l.partner_id.name"/></td>
+                            <td style="width: 8%; text-align: center;"><span t-field="l.partner_id.main_id_number"/></td>
+                            <td style="width: 8%; text-align: center;"><span t-field="l.partner_id.gross_income_number"/></td>
+                            <td colspan="3" style="margin: 0; padding: 0;">
+                                <table class="table" style="margin: 0; padding: 0; width: 100%;">
+                                    <tbody>
+                                        <tr t-foreach="l.tax_line_ids" t-as="t" valign="top">
+                                            <t t-if="l.type in ('out_refund', 'in_refund')">
+                                                <td style="width: 46%;"><span t-field="t.name"/></td>
+                                                <td style="width: 27%; text-align: right;"><span t-esc="'{0:,.2f}'.format(-t.base)"/></td>
+                                                <td style="width: 27%;text-align: right;"><span t-esc="'{0:,.2f}'.format(-t.amount)"/></td>
+                                            </t>
+                                            <t t-else="">
+                                                <td style="width: 46%;"><span t-field="t.name"/></td>
+                                                <td style="width: 27%;text-align: right;"><span t-esc="'{0:,.2f}'.format(t.base)"/></td>
+                                                <td style="width: 27%;text-align: right;"><span t-esc="'{0:,.2f}'.format(t.amount)"/></td>
+                                            </t>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </td>
+                            <!-- <td style="width: 10%;"> </td> -->
+                            <t t-if="l.type in ('out_refund', 'in_refund')">
+                                <!-- <td style="width: 8%;text-align: right;"><span t-esc="'{0:,.2f}'.format(-l.cc_amount_untaxed)"/></td> -->
+                                <!-- <td style="width: 8%;text-align: right;"><span t-esc="'{0:,.2f}'.format(-l.cc_amount_tax)"/></td> -->
+                                <td style="width: 8%;text-align: right;"><span t-esc="'{0:,.2f}'.format(-l.cc_amount_total)"/></td>
+                            </t>                  
+                            <t t-else="">         
+                                <!-- <td style="width: 8%;text-align: right;"><span t-esc="'{0:,.2f}'.format(l.cc_amount_untaxed)"/></td> -->
+                                <!-- <td style="width: 8%;text-align: right;"><span t-esc="'{0:,.2f}'.format(l.cc_amount_tax)"/></td> -->
+                                <td style="width: 8%;text-align: right;"><span t-esc="'{0:,.2f}'.format(l.cc_amount_total)"/></td>
+                            </t>
+                        </tr>
+                    </tbody>
+                </table>
+                <table class="table" align="right" style="width: 70%; margin-top: 30px; page-break-inside: avoid;">
+                    <caption style="line-height: 300%;">
+                        <strong>TOTALES DE OPERACIONES QUE GENERAN CREDITO FISCAL</strong>
+                    </caption> 
+                    <thead>
+                        <tr valign="top">
+                            <th>Nombre Impuesto</th>
+                            <th>Base</th>
+                            <th>Impuesto</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tfoot>
+                        <tr>
+                            <td style="width: 40%;"> </td>
+                            <td style="width: 20%; text-align: right;">
+                                <strong t-esc="'{0:,.2f}'.format(sum([tax.get_amounts(o, invoice_type=['in_invoice','out_invoice'])[0] for tax in o.vat_tax_ids]))"/>
+                            </td>
+                            <td style="width: 20%; text-align: right;">
+                                <strong t-esc="'{0:,.2f}'.format(sum([tax.get_amounts(o, invoice_type=['in_invoice','out_invoice'])[1] for tax in o.vat_tax_ids]))"/>
+                            </td>
+                            <td style="width: 20%; text-align: right;">
+                                <strong t-esc="'{0:,.2f}'.format(sum([tax.get_amounts(o, invoice_type=['in_invoice','out_invoice'])[2] for tax in o.vat_tax_ids]))"/>
+                            </td>
+                        </tr>
+                    </tfoot>
+                    <tbody style="font-size: 15px">
+                        <tr t-foreach="o.vat_tax_ids" t-as="tax" valign="top">
+                            <td style="width: 40%;"><span t-field="tax.name"/></td>
+                            <td style="width: 20%; text-align: right;"><span t-esc="'{0:,.2f}'.format(tax.get_amounts(o, invoice_type=['in_invoice','out_invoice'])[0])"/></td>
+                            <td style="width: 20%; text-align: right;"><span t-esc="'{0:,.2f}'.format(tax.get_amounts(o, invoice_type=['in_invoice','out_invoice'])[1])"/></td>
+                            <td style="width: 20%; text-align: right;"><span t-esc="'{0:,.2f}'.format(tax.get_amounts(o, invoice_type=['in_invoice','out_invoice'])[2])"/></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table class="table" align="right" style="width: 70%; margin-top: 30px; page-break-inside: avoid;">
+                    <caption style="line-height: 300%;">
+                        <strong>REGIMENES ESPECIALES</strong>
+                    </caption> 
+                    <thead>
+                        <tr valign="top">
+                            <th>Nombre Impuesto</th>
+                            <th>Base</th>
+                            <th>Impuesto</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tfoot>
+                        <tr>
+                            <td style="width: 40%;"> </td>
+                            <td style="width: 20%; text-align: right;">
+                                <strong t-esc="'{0:,.2f}'.format(sum([tax.get_amounts(o, invoice_type=['in_invoice','out_invoice'])[0] for tax in o.other_tax_ids]))"/>
+                            </td>
+                            <td style="width: 20%; text-align: right;">
+                                <strong t-esc="'{0:,.2f}'.format(sum([tax.get_amounts(o, invoice_type=['in_invoice','out_invoice'])[1] for tax in o.other_tax_ids]))"/>
+                            </td>
+                            <td style="width: 20%; text-align: right;">
+                                <strong t-esc="'{0:,.2f}'.format(sum([tax.get_amounts(o, invoice_type=['in_invoice','out_invoice'])[2] for tax in o.other_tax_ids]))"/>
+                            </td>
+                        </tr>
+                    </tfoot>
+                    <tbody style="font-size: 15px">
+                        <tr t-foreach="o.other_tax_ids" t-as="tax" valign="top">
+                            <td style="width: 40%;"><span t-field="tax.name"/></td>
+                            <td style="width: 20%; text-align: right;"><span t-esc="'{0:,.2f}'.format(tax.get_amounts(o, invoice_type=['in_invoice','out_invoice'])[0])"/></td>
+                            <td style="width: 20%; text-align: right;"><span t-esc="'{0:,.2f}'.format(tax.get_amounts(o, invoice_type=['in_invoice','out_invoice'])[1])"/></td>
+                            <td style="width: 20%; text-align: right;"><span t-esc="'{0:,.2f}'.format(tax.get_amounts(o, invoice_type=['in_invoice','out_invoice'])[2])"/></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table class="table" align="right" style="width: 70%; margin-top: 30px; page-break-inside: avoid;">
+                    <caption style="line-height: 300%;">
+                        <strong>TOTALES DE OPERACIONES QUE GENERAN DEBITO FISCAL</strong>
+                    </caption> 
+                    <thead>
+                        <tr valign="top">
+                            <th>Nombre Impuesto</th>
+                            <th>Base</th>
+                            <th>Impuesto</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tfoot>
+                        <tr>
+                            <td style="width: 40%;"> </td>
+                            <td style="width: 20%; text-align: right;">
+                                <strong t-esc="'{0:,.2f}'.format(sum([tax.get_amounts(o, invoice_type=['in_refund', 'out_refund'])[0] for tax in o.vat_tax_ids]))"/>
+                            </td>
+                            <td style="width: 20%; text-align: right;">
+                                <strong t-esc="'{0:,.2f}'.format(sum([tax.get_amounts(o, invoice_type=['in_refund', 'out_refund'])[1] for tax in o.vat_tax_ids]))"/>
+                            </td>
+                            <td style="width: 20%; text-align: right;">
+                                <strong t-esc="'{0:,.2f}'.format(sum([tax.get_amounts(o, invoice_type=['in_refund', 'out_refund'])[2] for tax in o.vat_tax_ids]))"/>
+                            </td>
+                        </tr>
+                    </tfoot>
+                    <tbody style="font-size: 15px">
+                        <tr t-foreach="o.vat_tax_ids" t-as="tax" valign="top">
+                            <td style="width: 40%;"><span t-field="tax.name"/></td>
+                            <td style="width: 20%; text-align: right;"><span t-esc="'{0:,.2f}'.format(tax.get_amounts(o, invoice_type=['in_refund', 'out_refund'])[0])"/></td>
+                            <td style="width: 20%; text-align: right;"><span t-esc="'{0:,.2f}'.format(tax.get_amounts(o, invoice_type=['in_refund', 'out_refund'])[1])"/></td>
+                            <td style="width: 20%; text-align: right;"><span t-esc="'{0:,.2f}'.format(tax.get_amounts(o, invoice_type=['in_refund', 'out_refund'])[2])"/></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        </t>
+    </template>
+
+</odoo>

@@ -20,6 +20,7 @@
     "data": [
         'data/l10n_ar_account_vat_ledger_data.xml',
         'report/account_vat_ledger_report.xml',
+        'report/account_vat_ledger_report_qweb.xml',
         'views/account_vat_report_views.xml',
         'wizards/res_config_settings_views.xml',
         'security/security.xml',
