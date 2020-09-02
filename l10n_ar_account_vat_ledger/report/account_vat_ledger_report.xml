@@ -37,7 +37,7 @@
     <record id="report_paperformat_ledger" model="report.paperformat">
         <field name="name">Account Vat Ledger paperformat</field>
         <field name="default" eval="True"/>
-        <field name="format">Letter</field>
+        <field name="format">A4</field>
         <field name="orientation">Landscape</field>
         <field name="margin_top">25</field>
         <field name="margin_bottom">7</field>
