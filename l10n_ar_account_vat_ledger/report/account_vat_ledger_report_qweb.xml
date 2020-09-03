@@ -11,8 +11,8 @@
     </template>
 
     <template id="report_account_vat_ledger_qweb_document">
-        <t t-call="web.html_container">
-        <div class="header" style="border-bottom: 2px solid black">
+        <t t-call="web.basic_layout">
+        <div class="header">
             <div class="row">
                 <div class="col-3 text-left">
                     <p style="margin: 0px"><span t-field="o.company_id.name"/></p>
@@ -56,85 +56,94 @@
         </div>
         <div class="page">
             <div class="row">
-                <table class="table">
-                    <thead>
+                <table class="table table-sm table-reports">
+                    <t t-set="exc" t-value="0"/>
+                    <t t-set="base" t-value="0"/>
+                    <t t-set="iva" t-value="0"/>
+                    <t t-set="otros" t-value="0"/>
+                    <t t-set="total" t-value="0"/>
+                    <thead style="border-top: 2px solid black; border-bottom: 2px solid black;">
                         <tr valign="top">
-                            <th>Fecha</th>
-                            <th>Comprobante</th>
-                            <th>Razón Social</th>
-                            <th>C.U.I.T.</th>
-                            <th>Nr.Ing.Brutos</th>
-                            <th>Reg. Especiales</th>
-                            <th>Base</th>
-                            <th>Impuesto</th>
-                            <th>Total</th>
+                            <th style="text-align: center;">Fecha</th>
+                            <th style="text-align: center;">Comprobante</th>
+                            <th style="text-align: center;">Razón Social</th>
+                            <th style="text-align: center;">C.U.I.T.</th>
+                            <th style="text-align: center;">Nr.Ing.Brutos</th>
+                            <th style="text-align: center;">Descripción</th>
+                            <th style="text-align: center;">No Grav /Exc</th>
+                            <th style="text-align: center;">Base</th>
+                            <th style="text-align: center;">Alic. IVA</th>
+                            <th style="text-align: center;">IVA</th>
+                            <th style="text-align: center;">Otros</th>
+                            <th style="text-align: center;">Total</th>
                         </tr>
                     </thead>
-                    <tfoot style="txt">
-                        <tr>
-                            <td colspan="6" style="width: 76%;"> </td>
-                            <td style="width: 8%; text-align: right;">
-                                <strong t-esc="'{0:,.2f}'.format(sum([l.type not in ('out_refund', 'in_refund') and sum([t.base for t in l.tax_line_ids]) for l in o.invoice_ids]) - sum([l.type in ('out_refund', 'in_refund') and sum([t.base for t in l.tax_line_ids]) for l in o.invoice_ids]))"/>
-                            </td>
-                            <td style="width: 8%; text-align: right;">
-                                <strong t-esc="'{0:,.2f}'.format(sum([l.type not in ('out_refund', 'in_refund') and sum([t.amount for t in l.tax_line_ids]) for l in o.invoice_ids]) - sum([l.type in ('out_refund', 'in_refund') and sum([t.amount for t in l.tax_line_ids]) for l in o.invoice_ids]))"/>
-                            </td>
-                            <td style="width: 8%; text-align: right;">
-                                <strong t-esc="'{0:,.2f}'.format(sum([l.type not in ('out_refund', 'in_refund') and l.cc_amount_total for l in o.invoice_ids]) - sum([l.type in ('out_refund', 'in_refund') and l.cc_amount_total for l in o.invoice_ids]))"/>
-                            </td>
-                            <!-- sum(record.tax_line_ids.mapped('base')) -->
-                            <!-- sum([line.amount for line in o.line_ids]) -->
-                        </tr>
-                    </tfoot>
-                    <tbody style="font-size: 15px">
-                        <tr t-foreach="o.invoice_ids" t-as="l" valign="top" style="border-bottom: 1px solid black !important;">
-                            <td style="width: 5%;"><span t-field="l.date_invoice" t-options='{"format": "dd/MM/yy"}'/></td>
-                            <td style="width: 12%;"><span t-field="l.display_name"/></td>
-                            <td style="width: 30%;"><span t-field="l.partner_id.name"/></td>
-                            <td style="width: 8%; text-align: center;"><span t-field="l.partner_id.main_id_number"/></td>
-                            <td style="width: 8%; text-align: center;"><span t-field="l.partner_id.gross_income_number"/></td>
-                            <td colspan="3" style="margin: 0; padding: 0;">
-                                <table class="table" style="margin: 0; padding: 0; width: 100%;">
+                    <tbody style="font-size: 14px;">
+                        <tr t-foreach="o.invoice_ids" t-as="l" valign="top">
+                            <t t-if="l.type in ('out_refund', 'in_refund')">
+                                <t t-set="sign" t-value="-1"/>
+                            </t>
+                            <t t-else="">
+                                <t t-set="sign" t-value="1"/>
+                            </t>
+                            <td style="width: 4%;"><span t-field="l.date_invoice" t-options="{&quot;format&quot;: &quot;dd/MM/yy&quot;}"/></td>
+                            <td style="width: 11%;"><span t-field="l.display_name"/></td>
+                            <td style="width: 20%;"><span t-field="l.partner_id.name"/></td>
+                            <td style="width: 5%; text-align: center;"><span t-field="l.partner_id.main_id_number"/></td>
+                            <td style="width: 5%; text-align: center;"><span t-field="l.partner_id.gross_income_number"/></td>
+                            <td colspan="6" style="margin: 0; padding: 0;">
+                                <table class="table" style="margin: 0; padding: 0; width: 100%; border: 0">
                                     <tbody>
                                         <tr t-foreach="l.tax_line_ids" t-as="t" valign="top">
-                                            <t t-if="l.type in ('out_refund', 'in_refund')">
-                                                <td style="width: 46%;"><span t-field="t.name"/></td>
-                                                <td style="width: 27%; text-align: right;"><span t-esc="'{0:,.2f}'.format(-t.base)"/></td>
-                                                <td style="width: 27%;text-align: right;"><span t-esc="'{0:,.2f}'.format(-t.amount)"/></td>
+                                            <td style="width: 39%;"><span t-field="t.name"/></td>
+                                            <t t-if="t.tax_id.amount == 0 and t.tax_id.tax_group_id.type == 'tax'">
+                                                <t t-set="exc" t-value="exc + (sign * t.cc_base)"/>
+                                                <td style="width: 13%; text-align: right;"><span t-esc="'{0:,.2f}'.format(sign * t.cc_base)"/></td>
+                                                <td style="width: 13%; text-align: right;"><span> </span></td>
+                                                <td style="width: 9%; text-align: right;"><span> </span></td>
+                                                <td style="width: 13%; text-align: right;"><span> </span></td>
+                                                <td style="width: 13%; text-align: right;"><span> </span></td>
+                                            </t>
+                                            <t t-elif="t.tax_id.amount != 0 and t.tax_id.tax_group_id.type == 'tax'">
+                                                <t t-set="base" t-value="base + (sign * t.cc_base)"/>
+                                                <t t-set="iva" t-value="iva + (sign * t.cc_amount)"/>
+                                                <td style="width: 13%; text-align: right;"><span> </span></td>
+                                                <td style="width: 13%; text-align: right;"><span t-esc="'{0:,.2f}'.format(sign * t.cc_base)"/></td>
+                                                <td style="width: 9%; text-align: right;"><span t-esc="'{0:,.2f}'.format(sign * t.tax_id.amount)"/>%</td>
+                                                <td style="width: 13%; text-align: right;"><span t-esc="'{0:,.2f}'.format(sign * t.cc_amount)"/></td>
+                                                <td style="width: 13%; text-align: right;"><span> </span></td>
                                             </t>
                                             <t t-else="">
-                                                <td style="width: 46%;"><span t-field="t.name"/></td>
-                                                <td style="width: 27%;text-align: right;"><span t-esc="'{0:,.2f}'.format(t.base)"/></td>
-                                                <td style="width: 27%;text-align: right;"><span t-esc="'{0:,.2f}'.format(t.amount)"/></td>
+                                                <t t-set="otros" t-value="otros + (sign * t.cc_amount)"/>
+                                                <td style="width: 13%; text-align: right;"><span> </span></td>
+                                                <td style="width: 13%; text-align: right;"><span> </span></td>
+                                                <td style="width: 9%; text-align: right;"><span> </span></td>
+                                                <td style="width: 13%; text-align: right;"><span> </span></td>
+                                                <td style="width: 13%; text-align: right;"><span t-esc="'{0:,.2f}'.format(sign * t.cc_amount)"/></td>
                                             </t>
                                         </tr>
                                     </tbody>
                                 </table>
                             </td>
-                            <!-- <td style="width: 10%;"> </td> -->
-                            <t t-if="l.type in ('out_refund', 'in_refund')">
-                                <!-- <td style="width: 8%;text-align: right;"><span t-esc="'{0:,.2f}'.format(-l.cc_amount_untaxed)"/></td> -->
-                                <!-- <td style="width: 8%;text-align: right;"><span t-esc="'{0:,.2f}'.format(-l.cc_amount_tax)"/></td> -->
-                                <td style="width: 8%;text-align: right;"><span t-esc="'{0:,.2f}'.format(-l.cc_amount_total)"/></td>
-                            </t>                  
-                            <t t-else="">         
-                                <!-- <td style="width: 8%;text-align: right;"><span t-esc="'{0:,.2f}'.format(l.cc_amount_untaxed)"/></td> -->
-                                <!-- <td style="width: 8%;text-align: right;"><span t-esc="'{0:,.2f}'.format(l.cc_amount_tax)"/></td> -->
-                                <td style="width: 8%;text-align: right;"><span t-esc="'{0:,.2f}'.format(l.cc_amount_total)"/></td>
-                            </t>
+                            <td style="width: 7%;text-align: right;">
+                                <t t-set="total" t-value="total + (sign * l.cc_amount_total)"/>
+                                <span t-esc="'{0:,.2f}'.format(sign * l.cc_amount_total)"/>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
-                <table class="table" align="right" style="width: 70%; margin-top: 30px; page-break-inside: avoid;">
-                    <caption style="line-height: 300%;">
+            </div>
+            <div class="row" style="page-break-inside: avoid;">
+                <table class="table table-sm" style="width: 60%; margin-top: 20px;">
+                    <caption style="caption-side: top; line-height: 200%; color: black;">
                         <strong>TOTALES DE OPERACIONES QUE GENERAN CREDITO FISCAL</strong>
                     </caption> 
                     <thead>
                         <tr valign="top">
                             <th>Nombre Impuesto</th>
-                            <th>Base</th>
-                            <th>Impuesto</th>
-                            <th>Total</th>
+                            <th style="text-align: center;">Base</th>
+                            <th style="text-align: center;">Impuesto</th>
+                            <th style="text-align: center;">Total</th>
                         </tr>
                     </thead>
                     <tfoot>
@@ -160,16 +169,18 @@
                         </tr>
                     </tbody>
                 </table>
-                <table class="table" align="right" style="width: 70%; margin-top: 30px; page-break-inside: avoid;">
-                    <caption style="line-height: 300%;">
+            </div>
+            <div class="row" style="page-break-inside: avoid;">
+                <table class="table table-sm" style="width: 60%; margin-top: 20px;">
+                    <caption style="caption-side: top; line-height: 200%; color: black;">
                         <strong>REGIMENES ESPECIALES</strong>
                     </caption> 
                     <thead>
                         <tr valign="top">
                             <th>Nombre Impuesto</th>
-                            <th>Base</th>
-                            <th>Impuesto</th>
-                            <th>Total</th>
+                            <th style="text-align: center;">Base</th>
+                            <th style="text-align: center;">Impuesto</th>
+                            <th style="text-align: center;">Total</th>
                         </tr>
                     </thead>
                     <tfoot>
@@ -195,16 +206,18 @@
                         </tr>
                     </tbody>
                 </table>
-                <table class="table" align="right" style="width: 70%; margin-top: 30px; page-break-inside: avoid;">
-                    <caption style="line-height: 300%;">
+            </div>
+            <div class="row" style="page-break-inside: avoid;">
+                <table class="table table-sm" style="width: 60%; margin-top: 20px;">
+                    <caption style="caption-side: top; line-height: 200%; color: black;">
                         <strong>TOTALES DE OPERACIONES QUE GENERAN DEBITO FISCAL</strong>
                     </caption> 
                     <thead>
                         <tr valign="top">
                             <th>Nombre Impuesto</th>
-                            <th>Base</th>
-                            <th>Impuesto</th>
-                            <th>Total</th>
+                            <th style="text-align: center;">Base</th>
+                            <th style="text-align: center;">Impuesto</th>
+                            <th style="text-align: center;">Total</th>
                         </tr>
                     </thead>
                     <tfoot>
