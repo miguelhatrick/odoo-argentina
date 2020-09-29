@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     "name": "Argentinian CITI Reports",
-    'version': '9.0.1.3.0',
+    'version': '12.0.1.5.0',
     'category': 'Localization/Argentina',
     'sequence': 14,
     'author': 'ADHOC SA,Moldeo Interactive,Odoo Community Association (OCA)',
@@ -18,8 +18,6 @@
         'data/account.document.type.csv',
     ],
     'demo': [
-    ],
-    'test': [
     ],
     'images': [
     ],

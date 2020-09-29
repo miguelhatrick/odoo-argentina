@@ -24,6 +24,7 @@
                 <header>
                     <button name="action_print" string="Print" states="draft" type="object" class="oe_highlight"/>
                     <button name="action_print" string="Print" states="cancel,presented" type="object"/>
+                    <button name="%(action_report_account_vat_ledger_qweb)d" string="Print PDF" type="action"/>
                     <button name="%(l10n_ar_account_vat_ledger_xlsx.vat_ledger_xlsx)d" string="Imprimir en columnas (beta)" help="Imprimir libro iva en columnas, beta" type="action"/>
                     <button name="action_present" string="Present" states="draft" type="object" class="oe_highlight"/>
                     <button name="action_cancel" string="Cancel" states="draft,presented" type="object"/>
@@ -122,6 +123,7 @@
     <record id="action_account_purchase_vat_ledger" model="ir.actions.act_window">
         <field name="name">Purchases VAT Ledger</field>
         <field name="res_model">account.vat.ledger</field>
+        <field name="view_mode">tree,form</field>
         <field name="context">{'default_type':'purchase'}</field>
         <field name="domain">[('type','=','purchase')]</field>
     </record>
@@ -129,6 +131,7 @@
     <record id="action_account_sale_vat_ledger" model="ir.actions.act_window">
         <field name="name">Sales VAT Ledger</field>
         <field name="res_model">account.vat.ledger</field>
+        <field name="view_mode">tree,form</field>
         <field name="context">{'default_type':'sale'}</field>
         <field name="domain">[('type','=','sale')]</field>
     </record>

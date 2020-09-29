@@ -24,4 +24,32 @@
         <field name="tml_source">file</field>
         <field name="print_report_name">'Libro IVA %s %s' % (object.type == 'purchase' and 'Compras' or 'Ventas', object.date_to)</field>
     </record>
+
+    <report
+        id="action_report_account_vat_ledger_qweb"
+        model="account.vat.ledger"
+        string="Account Vat Ledger PDF"
+        report_type="qweb-pdf"
+        name="l10n_ar_account_vat_ledger.report_account_vat_ledger_qweb"
+        file="l10n_ar_account_vat_ledger.report_account_vat_ledger_qweb"
+    />
+    
+    <record id="report_paperformat_ledger" model="report.paperformat">
+        <field name="name">Account Vat Ledger paperformat</field>
+        <field name="default" eval="True"/>
+        <field name="format">A4</field>
+        <field name="orientation">Landscape</field>
+        <field name="margin_top">25</field>
+        <field name="margin_bottom">7</field>
+        <field name="margin_left">7</field>
+        <field name="margin_right">7</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">20</field>
+        <field name="dpi">110</field>
+    </record>
+
+    <record id="l10n_ar_account_vat_ledger.action_report_account_vat_ledger_qweb" model="ir.actions.report">
+        <field name="paperformat_id" ref="l10n_ar_account_vat_ledger.report_paperformat_ledger"/>
+    </record>
+
 </odoo>
