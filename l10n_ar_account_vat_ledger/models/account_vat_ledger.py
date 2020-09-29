@@ -133,6 +133,15 @@ class AccountVatLedger(models.Model):
             # ('Perc. IVA', tg_per_iva),
         ]
 
+
+    @api.model
+    def get_other_tax_columns(self):
+        other_tax_ids = []
+        for other in self.other_tax_ids.sorted('name'):
+            other_tax_ids.append((other.name, other.id))
+        return other_tax_ids
+
+
     @api.multi
     @api.depends('journal_ids', 'date_from', 'date_to')
     def _compute_data(self):

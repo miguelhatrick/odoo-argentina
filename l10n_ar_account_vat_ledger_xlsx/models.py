@@ -148,6 +148,92 @@ class VatLedgerXlsx(models.AbstractModel):
 
                 row_index = row_index + 1
 
+            # Details sheets
+            sheet_details = workbook.add_worksheet("Details")
+            bold = workbook.add_format({'bold': True})
+            sheet_details.write(0, 0, obj.name, bold)
+            headersdef = []
+            headersdef.append( XHeader( 'Fecha','Fecha' ) )
+            headersdef.append( XHeader( 'Tipo','Tipo' ) )
+            headersdef.append( XHeader( 'Cpbte','Comprobante' ) )
+            headersdef.append( XHeader( 'Nombre',(obj.type=="sale" and 'Cliente' or 'Proveedor' ) ) )
+            #headersdef.append( XHeader( 'Anul' ) )
+            headersdef.append( XHeader( 'IVA','Cond. IVA' ) )
+            headersdef.append( XHeader( 'CUIT','CUIT o DOC' ) )
+
+            #headersdef.append( XHeader( 'PTIPO','Producto Tipo' ) )
+            #headersdef.append( XHeader( 'Cat','Categoria' ) )
+            headersdef.append( XHeader( 'Gravado' ) )
+            headersdef.append( XHeader( 'No Gravado' ) )
+            for column_name, taxgroup in obj.get_tax_groups_columns():
+                _logger.info("column_name:"+str(column_name))
+                headersdef.append( XHeader(column_name))
+
+            other_tax_columns = obj.get_other_tax_columns()
+
+            for column_name, tax in other_tax_columns:
+                headersdef.append( XHeader(column_name))
+
+            headersdef.append( XHeader( 'Total' ) )
+            headers = {}
+            index = 0
+            for header in headersdef:
+                if (header.hidden==False):
+                    sheet_details.write(3,index,header.hint,bold)
+                    header.column = index
+                    headers[header.name] = header
+                    index = index + 1
+            row_index = 4+2
+
+            for inv in obj.invoice_ids:
+                inv_sign = (inv.type in ("out_refund","in_refund") and -1.0 or 1.0)
+                taxes_product_types = {}
+                for line in inv.invoice_line_ids:
+                    txids = line.invoice_line_tax_ids
+                    #_logger.info(txids)
+                    pid_type = line.product_id.type
+                    taxid = txids
+                    if ( len(txids)>1 ):
+                        taxid = txids[0]
+                    if (taxid):
+                        if (taxid.description in taxes_product_types):
+                            prevtype = taxes_product_types[taxid.description]
+                            if (prevtype!=pid_type):
+                                taxes_product_types[taxid.description] = "MIXTO"
+                        else:
+                            taxes_product_types[taxid.description] = pid_type
+                    taxes_product_types[taxid.description] = pid_type
+                _logger.info(taxes_product_types)
+
+                #_logger.info(inv.date_invoice)
+                sheet_details.write(row_index,headers["Fecha"].column, parse(str(inv.date_invoice)).strftime("%d/%m/%Y"))
+                sheet_details.write(row_index,headers["Tipo"].column,inv.vat_ledger_ref)
+                sheet_details.write(row_index,headers["Cpbte"].column,inv.display_name)
+                sheet_details.write(row_index,headers["Nombre"].column,inv.partner_id.name)
+                sheet_details.write(row_index,headers["CUIT"].column,inv.partner_id.main_id_number)
+                sheet_details.write(row_index,headers["IVA"].column,inv.partner_id.afip_responsability_type_id.name)
+                #gravado
+                vat_base_amount = inv_sign*inv.cc_vat_taxable_amount
+                sheet_details.write(row_index,headers["Gravado"].column, vat_base_amount )
+                #no gravado
+                not_vat_base_amount = inv_sign*(inv.cc_amount_untaxed - inv.cc_vat_taxable_amount)
+                sheet_details.write(row_index,headers["No Gravado"].column, round(not_vat_base_amount,2) )
+
+                for column_name, tax_groups in obj.get_tax_groups_columns():
+                    _logger.info(column_name)
+                    cc_amount = inv_sign*inv.tax_line_ids.filtered(lambda x: x.tax_id.tax_group_id == tax_groups).cc_amount
+                    sheet_details.write( row_index, headers[column_name].column, cc_amount )
+
+                # others taxes
+                for column_name, tax in other_tax_columns:
+                    cc_amount = inv_sign*inv.tax_line_ids.filtered(lambda x: x.tax_id.id == tax).cc_amount
+                    sheet_details.write( row_index, headers[column_name].column, cc_amount )
+
+                total = inv_sign*inv.cc_amount_total
+                sheet_details.write(row_index,headers["Total"].column,total)
+
+                row_index = row_index + 1
+
 
 
 #VatLedgerXlsx('report.account.vat.ledger.xlsx','account.vat.ledger')
