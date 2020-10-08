@@ -14,6 +14,7 @@
         #"report_custom_filename",
         #"date_range",
         # "account_fiscal_year",
+	"l10n_account_vat_ledger_xlsx"
     ],
     'external_dependencies': {
     },
