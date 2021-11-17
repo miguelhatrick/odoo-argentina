@@ -281,7 +281,18 @@ class AccountPayment(models.Model):
                 'communication': vals.get('communication'),
             })
             vals['payment_group_id'] = payment_group.id
+
+        # TODO : Fix this better. This avoids a double account move entries
+        if 'line_ids' not in vals:
+            vals['line_ids'] = []
+
         payment = super(AccountPayment, self).create(vals)
+
+        # TODO: Find the real fix for this. This fixes the problems creating new NOT POSTED entries into the journal
+        # The current installation creates a False/year/m/day for those journals that allready have an entry
+        if 'False' in payment.name:
+            payment.move_id._set_next_sequence()
+
         if create_payment_group:
             payment.payment_group_id.post()
         return payment
