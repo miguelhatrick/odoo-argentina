@@ -10,6 +10,8 @@
             <page name="accounting" position="after">
                 <page string="Fiscal Data" name="fiscal_data" attrs="{'invisible': [('is_company','=',False),('parent_id','!=',False)]}">
                     <!-- add other documents -->
+                    <button name="get_data_from_padron_afip" string="Update data" type="object"/>
+
                     <group string="AFIP" name="afip">
                         <group name="afip_col_1">
                             <field name="start_date"/>

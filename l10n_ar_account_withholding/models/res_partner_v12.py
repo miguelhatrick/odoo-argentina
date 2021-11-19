@@ -129,6 +129,9 @@ class ResPartner(models.Model):
         #     # body="Datos utilizados:<br/>%s" % vals,
         #     attachments=attachments)
 
+    def cuit_required(self):
+        return self.l10n_ar_vat
+
     def get_data_from_padron_afip(self):
         self.ensure_one()
         cuit = self.cuit_required()
